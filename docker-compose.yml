@@ -1,0 +1,59 @@
+version: '3.9'
+services:
+  nginx:
+    build: ./nginx/
+    container_name: nginx
+    ports:
+      - 8080:80
+    volumes:
+      - ./php-app:/usr/share/nginx/html
+    restart: always
+    depends_on:
+      - php-fpm
+      - database
+    networks:
+      - ecom-network
+    
+  database:
+    image: mysql:8.3
+    container_name: database
+    environment:
+      MYSQL_DATABASE:${MYSQL_DATABASE}
+      MYSQL_USER:${MYSQL_USER}
+      MYSQL_PASSWORD:${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD:${MYSQL_ROOT_PASSWORD}
+    ports:
+        - 3306:3306
+    restart: always
+    volumes:
+      - ./mysql/data:/var/lib/mysql
+      - ./mysql/initdb/electric-shop.sql:./docker-entrypoint-initdb.d/electric-shop.sql
+    networks:
+        - ecom-network
+  phpmyadmin:
+    image: phpmyadmin:5.1
+    container_name: phpmyadmin
+    ports:
+      - '3400:80'
+    depends_on:
+      - database
+    environment:
+      PMA_PORTS:3306
+      MA_HOST:database
+      MYSQL_ROOT_PASSWORD:${MYSQL_ROOT_PASSWORD}
+    networks:
+      - ecom-network
+  php-fpm:
+    build: ./php-app/
+    container_name: php-fpm
+    restart: always
+    ports:
+      - 9000:9000
+    volumes:
+      - ./php-app:/usr/share/nginx/html
+    networks:
+      - ecom-network
+networks:
+  ecom-network:
+    driver: bridge
+ 
