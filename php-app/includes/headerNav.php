@@ -1,27 +1,44 @@
-<?php  
-// Check if session is not already started
-if (session_status() !== PHP_SESSION_ACTIVE) {
+<?php
+// Start session if not already started
+if (session_status() === PHP_SESSION_NONE) {
     session_start();
-} include_once 'includes/config.php';
- //run whenever this file is used no need of isset or any condition to get website image footer etc
- $sql5 ="SELECT * FROM  settings;";
- $result5 = $conn->query($sql5);
- $row5 = $result5->fetch_assoc();
- $_SESSION['web-name'] = $row5['website_name'];
- $_SESSION['web-img'] = $row5['website_logo'];
- $_SESSION['web-footer'] = $row5['website_footer'];
-//it is used to get number of carts item 
-if(isset($_SESSION['id'])){
-$sql44 ="SELECT * FROM  carts WHERE uid='{$_SESSION['id']}';";
-$result44 = $conn->query($sql44);
-$_SESSION['cartItemNum']=0;
-if ($result44->num_rows > 0) {
-	while($row44 = $result44->fetch_assoc()) {
-		$_SESSION['cartItemNum']+=$row44['quantity'];
-	}
 }
+
+// Include database configuration
+include_once 'includes/config.php';
+
+// Fetch settings from database and store in session variables
+$sqlSettings = "SELECT * FROM settings;";
+$resultSettings = $conn->query($sqlSettings);
+if ($resultSettings === false) {
+    die("Error executing query: " . $conn->error);
+}
+
+if ($resultSettings->num_rows > 0) {
+    $rowSettings = $resultSettings->fetch_assoc();
+    $_SESSION['web-name'] = $rowSettings['website_name'];
+    $_SESSION['web-img'] = $rowSettings['website_logo'];
+    $_SESSION['web-footer'] = $rowSettings['website_footer'];
+}
+
+// Fetch cart items if user is logged in
+if (isset($_SESSION['id'])) {
+    $sqlCartItems = "SELECT * FROM carts WHERE uid = ?";
+    $stmtCartItems = $conn->prepare($sqlCartItems);
+    $stmtCartItems->bind_param("i", $_SESSION['id']);
+    $stmtCartItems->execute();
+    $resultCartItems = $stmtCartItems->get_result();
+
+    $_SESSION['cartItemNum'] = 0;
+    if ($resultCartItems->num_rows > 0) {
+        while ($rowCartItems = $resultCartItems->fetch_assoc()) {
+            $_SESSION['cartItemNum'] += $rowCartItems['quantity'];
+        }
+    }
+    $stmtCartItems->close();
 }
 ?>
+
 
 <?php
  //1st step(i.e connection) done through config file

@@ -1,17 +1,15 @@
-
 <?php
-//making config as we need this everytime we can just use it through include_once
-//1st step for database php connection
-$serverName = "localhost";
-$dBUsername = "root";
-$dBPassword = "";
-$dBName = "electric-shop";
+// Database configuration
+$serverName = "database";
+$dBUsername = "root"; // Replace with your database username
+$dBPassword = "shashi@123"; // Replace with your database password
+$dBName = "electric_shop"; // Replace with your database name
 
-//Before we can access data in the MySQL database, we need to be able to connect to the server i.e php
-$conn = new mysqli($serverName,$dBUsername,$dBPassword,$dBName );
+// Create connection
+$conn = new mysqli($serverName, $dBUsername, $dBPassword, $dBName);
 
 // Check connection
-if(!$conn){
-    die("Connection failed: ".$conn->connect_error());
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
 }
 ?>

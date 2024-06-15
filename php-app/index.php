@@ -1,5 +1,5 @@
 ﻿<?php
-   include_once('./includes/headerNav.php')
+include_once('./includes/headerNav.php')
 ?>
 <!-- Header End====================================================================== -->
 <head>
