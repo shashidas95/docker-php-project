@@ -1,8 +1,8 @@
 <?php
 // Database configuration
 $serverName = "database";
-$dBUsername = "root"; // Replace with your database username
-$dBPassword = "shashi@123"; // Replace with your database password
+$dBUsername = "shashi"; // Replace with your database username
+$dBPassword = "shashi123"; // Replace with your database password
 $dBName = "electric_shop"; // Replace with your database name
 
 // Create connection

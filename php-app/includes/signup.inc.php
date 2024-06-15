@@ -1,66 +1,49 @@
-
 <?php
-
 include_once('./config.php');
-if(isset($_POST['submit'])){
-   
-    //ACCESSING all the input value from its name(key) given in form through its post associative array
-    $name = $_POST['name'];
-    $email = $_POST['email'];
-    $address = $_POST['address'];
-    $number = $_POST['number'];
-    $pwd = $_POST['pwd'];
-    $rpwd = $_POST['rpwd'];
 
-  
-    //to stop creating account with already available gmail
-    $sql = "SELECT * from customer where customer_email ='{$email}'";
-    $result = $conn->query($sql);
+if (isset($_POST['submit'])) {
+    $name = trim($_POST['name']);
+    $email = trim($_POST['email']);
+    $address = trim($_POST['address']);
+    $number = trim($_POST['number']);
+    $pwd = trim($_POST['pwd']);
+    $rpwd = trim($_POST['rpwd']);
 
-    if(mysqli_num_rows($result)>0){
-        header("location: ../signup.php?error=emailAlreadytaken");
+    $sql = "SELECT * FROM customer WHERE customer_email = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        header("Location: ../signup.php?error=emailAlreadytaken");
         exit();
     }
 
-
-    
-    //1st step(i.e connection) done through config file
-    require_once './config.php';
     require_once './signupFn.inc.php';
 
-//error handler done by using diff functions
+    if (emptyInputSignup($name, $email, $number, $pwd, $rpwd, $address)) {
+        header("Location: ../signup.php?error=emptyInput");
+        exit();
+    }
 
-//1st checking if any input field is left empty by the user
-if(emptyInputSignup($name, $email,  $number, $pwd,$rpwd,$address) == true){
-    header("location: ../signup.php?error=emptyInput");
+    if (invalidPhone($number)) {
+        header("Location: ../signup.php?error=enterValidNumber");
+        exit();
+    }
+
+    if (invalidEmail($email)) {
+        header("Location: ../signup.php?error=invalidemail");
+        exit();
+    }
+
+    if (!pwdMatch($pwd, $rpwd)) {
+        header("Location: ../signup.php?error=pwdnotmatch");
+        exit();
+    }
+
+    createUser($name, $email, $address, $pwd, $number);
+} else {
+    header("Location: ../signup.php");
     exit();
 }
-
-//2nd checking if user entererd uid is appropriate or not
-if(invalidPhone($number) == true){
-    header("location: ../signup.php?error=enterValidNumber");
-    exit();
-}
-
-//3rd checking if user entererd email is proper or not
-if(invalidEmail($email) ==true){
-    header("location: ../signup.php?error=invalidemail");
-    exit();
-
-}
-//4th checking if user entererd password match repeated pwd
-if(pwdMatch($pwd,$rpwd) !==true){
-    header("location: ../signup.php?error=pwdnotmatch");
-    exit();
-}
-
-
-//finally creating user in database incase all above condition got true
-createUser($name,$email,$address,$pwd,$number);
-}//if end
-
-else{
-    /* This is to redirect the browser */
-    header("location: ../signup.php");
-    exit("Hey there is some errors!");
-}//else end
